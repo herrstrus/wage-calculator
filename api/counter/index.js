@@ -11,61 +11,22 @@ function parseConnectionString(connStr) {
   return parts;
 }
 
-// Create SharedKey authorization header for Azure Storage
-function createAuthHeader(method, accountName, accountKey, containerName, blobName, contentLength = 0, contentType = "", context) {
+// Create SharedKey authorization header for Azure Table Storage (simpler than Blob)
+function createTableAuthHeader(method, accountName, accountKey, path) {
   const dateString = new Date().toUTCString();
-  const version = "2021-06-08";
   
-  // Build canonicalized headers (all x-ms-* headers, sorted alphabetically)
-  const canonicalizedHeaders = method === "PUT" 
-    ? `x-ms-blob-type:BlockBlob\nx-ms-date:${dateString}\nx-ms-version:${version}\n`
-    : `x-ms-date:${dateString}\nx-ms-version:${version}\n`;
-  
-  // Build canonicalized resource
-  const canonicalizedResource = `/${accountName}/${containerName}/${blobName}`;
-  
-  // String to sign format for Blob service (exactly as Azure expects)
-  const stringToSign = 
-    method + "\n" +                      // HTTP Verb
-    "" + "\n" +                          // Content-Encoding
-    "" + "\n" +                          // Content-Language
-    (contentLength || "") + "\n" +       // Content-Length
-    "" + "\n" +                          // Content-MD5
-    contentType + "\n" +                 // Content-Type
-    "" + "\n" +                          // Date
-    "" + "\n" +                          // If-Modified-Since
-    "" + "\n" +                          // If-Match
-    "" + "\n" +                          // If-None-Match
-    "" + "\n" +                          // If-Unmodified-Since
-    "" + "\n" +                          // Range
-    canonicalizedHeaders +               // x-ms-* headers
-    canonicalizedResource;               // /{account}/{container}/{blob}
-  
-  if (context) {
-    context.log(`[${method}] String to sign:`, JSON.stringify(stringToSign));
-  }
+  // String to sign for Table service is much simpler than Blob
+  const stringToSign = `${method}\n\n\n${dateString}\n${path}`;
   
   const hmac = crypto.createHmac("sha256", Buffer.from(accountKey, "base64"));
   const signature = hmac.update(stringToSign, "utf8").digest("base64");
   
-  const headers = {
+  return {
     "Authorization": `SharedKey ${accountName}:${signature}`,
-    "x-ms-version": version,
-    "x-ms-date": dateString
+    "x-ms-date": dateString,
+    "x-ms-version": "2019-02-02",
+    "Accept": "application/json;odata=nometadata"
   };
-  
-  if (contentType) {
-    headers["Content-Type"] = contentType;
-  }
-  
-  if (method === "PUT") {
-    headers["x-ms-blob-type"] = "BlockBlob";
-    if (contentLength) {
-      headers["Content-Length"] = contentLength.toString();
-    }
-  }
-  
-  return headers;
 }
 
 module.exports = async function (context, req) {
@@ -77,56 +38,70 @@ module.exports = async function (context, req) {
       throw new Error("AZURE_STORAGE_CONNECTION_STRING not configured");
     }
     
-    context.log("Connection string found, parsing...");
     const { AccountName, AccountKey } = parseConnectionString(connectionString);
-    context.log(`Account: ${AccountName}, Key length: ${AccountKey ? AccountKey.length : 0}`);
+    context.log(`Account: ${AccountName}`);
     
-    const containerName = "counter";
-    const blobName = "count.json";
-    const blobUrl = `https://${AccountName}.blob.core.windows.net/${containerName}/${blobName}`;
+    const tableName = "visitcounter";
+    const partitionKey = "counter";
+    const rowKey = "visits";
+    
+    // Table Storage REST API endpoint
+    const tableUrl = `https://${AccountName}.table.core.windows.net/${tableName}(PartitionKey='${partitionKey}',RowKey='${rowKey}')`;
+    const path = `/${AccountName}/${tableName}(PartitionKey='${partitionKey}',RowKey='${rowKey}')`;
     
     let count = 0;
+    let etag = null;
     
-    // Try to read existing count
+    // Try to read existing count from Table Storage
     try {
-      context.log(`Attempting to read blob: ${blobUrl}`);
-      const readHeaders = createAuthHeader("GET", AccountName, AccountKey, containerName, blobName, 0, "", context);
-      const readResponse = await fetch(blobUrl, {
+      const readHeaders = createTableAuthHeader("GET", AccountName, AccountKey, path);
+      const readResponse = await fetch(tableUrl, {
         method: "GET",
         headers: readHeaders
       });
       
       if (readResponse.ok) {
-        const text = await readResponse.text();
-        const data = JSON.parse(text);
-        count = data.count || 0;
-        context.log("Read count from blob:", count);
+        const data = await readResponse.json();
+        count = parseInt(data.Count) || 0;
+        etag = readResponse.headers.get("ETag");
+        context.log("Read count from table:", count);
       } else if (readResponse.status !== 404) {
-        const errorText = await readResponse.text();
-        context.log("Read error:", readResponse.status, errorText);
+        context.log("Read returned:", readResponse.status);
       }
     } catch (e) {
-      context.log("Could not read blob:", e.message);
+      context.log("Could not read table entity:", e.message);
     }
     
     // Increment counter
     count++;
-    const data = JSON.stringify({ count, timestamp: new Date().toISOString() });
     
-    // Write updated count
-    context.log(`Writing count ${count} to blob`);
-    const writeHeaders = createAuthHeader("PUT", AccountName, AccountKey, containerName, blobName, data.length, "application/json", context);
+    // Create or update entity in Table Storage
+    const entity = {
+      PartitionKey: partitionKey,
+      RowKey: rowKey,
+      Count: count,
+      Timestamp: new Date().toISOString()
+    };
     
-    const writeResponse = await fetch(blobUrl, {
+    const entityJson = JSON.stringify(entity);
+    
+    // Use PUT to insert or replace (upsert)
+    const upsertUrl = tableUrl;
+    const upsertPath = path;
+    const writeHeaders = createTableAuthHeader("PUT", AccountName, AccountKey, upsertPath);
+    writeHeaders["Content-Type"] = "application/json";
+    writeHeaders["Content-Length"] = entityJson.length.toString();
+    
+    const writeResponse = await fetch(upsertUrl, {
       method: "PUT",
       headers: writeHeaders,
-      body: data
+      body: entityJson
     });
     
     if (!writeResponse.ok) {
       const errorText = await writeResponse.text();
       context.log.error("Write failed:", writeResponse.status, errorText);
-      throw new Error(`Failed to write blob: ${writeResponse.status}`);
+      throw new Error(`Failed to write table entity: ${writeResponse.status}`);
     }
     
     context.log("Successfully wrote count:", count);
