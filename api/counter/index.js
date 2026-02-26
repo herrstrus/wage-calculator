@@ -11,18 +11,18 @@ function parseConnectionString(connStr) {
   return parts;
 }
 
-// Create SharedKey authorization header for Azure Table Storage (simpler than Blob)
+// Create SharedKeyLite authorization header for Azure Table Storage
 function createTableAuthHeader(method, accountName, accountKey, path) {
   const dateString = new Date().toUTCString();
   
-  // String to sign for Table service is much simpler than Blob
-  const stringToSign = `${method}\n\n\n${dateString}\n${path}`;
+  // SharedKeyLite string-to-sign for Table service
+  const stringToSign = `${dateString}\n${path}`;
   
   const hmac = crypto.createHmac("sha256", Buffer.from(accountKey, "base64"));
   const signature = hmac.update(stringToSign, "utf8").digest("base64");
   
   return {
-    "Authorization": `SharedKey ${accountName}:${signature}`,
+    "Authorization": `SharedKeyLite ${accountName}:${signature}`,
     "x-ms-date": dateString,
     "x-ms-version": "2019-02-02",
     "Accept": "application/json;odata=nometadata"
@@ -66,7 +66,8 @@ module.exports = async function (context, req) {
         etag = readResponse.headers.get("ETag");
         context.log("Read count from table:", count);
       } else if (readResponse.status !== 404) {
-        context.log("Read returned:", readResponse.status);
+        const errorText = await readResponse.text();
+        context.log("Read returned:", readResponse.status, errorText);
       }
     } catch (e) {
       context.log("Could not read table entity:", e.message);
@@ -80,7 +81,7 @@ module.exports = async function (context, req) {
       PartitionKey: partitionKey,
       RowKey: rowKey,
       Count: count,
-      Timestamp: new Date().toISOString()
+      UpdatedAt: new Date().toISOString()
     };
     
     const entityJson = JSON.stringify(entity);
@@ -91,6 +92,7 @@ module.exports = async function (context, req) {
     const writeHeaders = createTableAuthHeader("PUT", AccountName, AccountKey, upsertPath);
     writeHeaders["Content-Type"] = "application/json";
     writeHeaders["Content-Length"] = entityJson.length.toString();
+    writeHeaders["If-Match"] = "*";
     
     const writeResponse = await fetch(upsertUrl, {
       method: "PUT",
