@@ -214,6 +214,90 @@
             display: block;
         }
 
+        .working-time-button {
+            width: 100%;
+            padding: 14px;
+            background: var(--secondary-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .working-time-button:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(64, 112, 144, 0.3);
+        }
+
+        .working-time-button::after {
+            content: '▼';
+            transition: transform 0.3s ease;
+        }
+
+        .working-time-button.expanded::after {
+            transform: rotate(180deg);
+        }
+
+        .working-time-section {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            border: 1px solid rgba(64, 112, 144, 0.3);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .working-time-section.show {
+            display: block;
+        }
+
+        .working-time-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+            font-size: 16px;
+        }
+
+        .working-time-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .working-time-table thead {
+            background: rgba(64, 112, 144, 0.1);
+        }
+
+        .working-time-table th,
+        .working-time-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(64, 112, 144, 0.2);
+        }
+
+        .working-time-table th {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .working-time-table td {
+            color: var(--text-dark);
+        }
+
+        .working-time-table tr:hover {
+            background: rgba(105, 181, 232, 0.1);
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 25px;
@@ -286,6 +370,96 @@
             <div class="formula-line"><strong>Stawka Godzinowa =</strong> (Stawka Miesięczna × 12) ÷ 231 ÷ 8</div>
             <div class="formula-line"><strong>Wynagrodzenie Miesięczne =</strong> (Stawka Godzinowa × Godziny) + 300 PLN</div>
             <div class="formula-line"><strong>Wynagrodzenie Roczne =</strong> Wynagrodzenie Miesięczne × 12</div>
+        </div>
+
+        <button type="button" class="working-time-button" id="workingTimeToggle">📅 Wymiar czasu w 2026</button>
+
+        <div class="working-time-section" id="workingTimeSection">
+            <div class="working-time-title">Wymiar czasu pracy w 2026</div>
+            <table class="working-time-table">
+                <thead>
+                    <tr>
+                        <th>Miesiąc</th>
+                        <th>Godziny</th>
+                        <th>Dni pracy</th>
+                        <th>Dni wolne</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Styczeń</td>
+                        <td>168</td>
+                        <td>21</td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <td>Luty</td>
+                        <td>160</td>
+                        <td>20</td>
+                        <td>8</td>
+                    </tr>
+                    <tr>
+                        <td>Marzec</td>
+                        <td>176</td>
+                        <td>22</td>
+                        <td>9</td>
+                    </tr>
+                    <tr>
+                        <td>Kwiecień</td>
+                        <td>160</td>
+                        <td>20</td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <td>Maj</td>
+                        <td>168</td>
+                        <td>21</td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <td>Czerwiec</td>
+                        <td>160</td>
+                        <td>20</td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <td>Lipiec</td>
+                        <td>176</td>
+                        <td>22</td>
+                        <td>9</td>
+                    </tr>
+                    <tr>
+                        <td>Sierpień</td>
+                        <td>176</td>
+                        <td>22</td>
+                        <td>9</td>
+                    </tr>
+                    <tr>
+                        <td>Wrzesień</td>
+                        <td>168</td>
+                        <td>21</td>
+                        <td>9</td>
+                    </tr>
+                    <tr>
+                        <td>Październik</td>
+                        <td>176</td>
+                        <td>22</td>
+                        <td>9</td>
+                    </tr>
+                    <tr>
+                        <td>Listopad</td>
+                        <td>160</td>
+                        <td>20</td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <td>Grudzień</td>
+                        <td>168</td>
+                        <td>21</td>
+                        <td>10</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
     </div>
@@ -391,6 +565,15 @@
 
         // Set focus on first input
         monthlyRateInput.focus();
+
+        // Working time section toggle
+        const workingTimeToggle = document.getElementById('workingTimeToggle');
+        const workingTimeSection = document.getElementById('workingTimeSection');
+
+        workingTimeToggle.addEventListener('click', function() {
+            workingTimeSection.classList.toggle('show');
+            workingTimeToggle.classList.toggle('expanded');
+        });
     </script>
 </body>
 </html>
