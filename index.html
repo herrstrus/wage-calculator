@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENDV Wage Calculator - Kalkulator faktura B2B</title>
+    <title>ENDV Kalkulator Faktura B2B</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23ff563f'/></svg>">
     <style>
 
@@ -336,11 +336,11 @@
 <body>
     <div class="container">
         <h1>💰 <span class="brand-endv">ENDV</span> Kalkulator Faktura B2B</h1>
-        <p class="subtitle">Wage Calculator - Oblicz stawkę godzinową i wynagrodzenie</p>
+        <p class="subtitle">Oblicz stawkę godzinową i wynagrodzenie</p>
 
         <form id="calculatorForm">
             <div class="form-group">
-                <label for="monthlyRate">Stawka Miesięczna (Monthly Rate) *</label>
+                <label for="monthlyRate">Stawka Miesięczna *</label>
                 <input 
                     type="number" 
                     id="monthlyRate" 
@@ -354,7 +354,7 @@
             </div>
 
             <div class="form-group">
-                <label for="hoursWorked">Godziny Przepracowane (Hours Worked) *</label>
+                <label for="hoursWorked">Godziny Przepracowane *</label>
                 <input 
                     type="number" 
                     id="hoursWorked" 
@@ -367,20 +367,20 @@
                 <div class="error" id="hoursWorkedError"></div>
             </div>
 
-            <button type="submit">Oblicz / Calculate</button>
+            <button type="submit">Oblicz</button>
         </form>
 
         <div class="results" id="results">
             <div class="result-row">
-                <span class="result-label">Stawka Godzinowa (Hourly Rate)</span>
+                <span class="result-label">Stawka Godzinowa</span>
                 <span class="result-value" id="hourlyRate">0.00 PLN</span>
             </div>
             <div class="result-row">
-                <span class="result-label">Wynagrodzenie za Miesiąc (Monthly Salary)</span>
+                <span class="result-label">Wynagrodzenie za Miesiąc</span>
                 <span class="result-value" id="monthlySalary">0.00 PLN</span>
             </div>
             <div class="result-row">
-                <span class="result-label">Wynagrodzenie za Rok (Annual Salary)</span>
+                <span class="result-label">Wynagrodzenie za Rok</span>
                 <span class="result-value" id="annualSalary">0.00 PLN</span>
             </div>
         </div>
@@ -408,9 +408,9 @@
                 <tbody>
                     <tr>
                         <td>Styczeń</td>
-                        <td>168</td>
-                        <td>21</td>
-                        <td>10</td>
+                        <td>160</td>
+                        <td>20</td>
+                        <td>11</td>
                     </tr>
                     <tr>
                         <td>Luty</td>
@@ -426,39 +426,39 @@
                     </tr>
                     <tr>
                         <td>Kwiecień</td>
-                        <td>160</td>
-                        <td>20</td>
-                        <td>10</td>
+                        <td>168</td>
+                        <td>21</td>
+                        <td>9</td>
                     </tr>
                     <tr>
                         <td>Maj</td>
-                        <td>168</td>
-                        <td>21</td>
-                        <td>10</td>
+                        <td>160</td>
+                        <td>20</td>
+                        <td>11</td>
                     </tr>
                     <tr>
                         <td>Czerwiec</td>
-                        <td>160</td>
-                        <td>20</td>
-                        <td>10</td>
-                    </tr>
-                    <tr>
-                        <td>Lipiec</td>
-                        <td>176</td>
-                        <td>22</td>
-                        <td>9</td>
-                    </tr>
-                    <tr>
-                        <td>Sierpień</td>
-                        <td>176</td>
-                        <td>22</td>
-                        <td>9</td>
-                    </tr>
-                    <tr>
-                        <td>Wrzesień</td>
                         <td>168</td>
                         <td>21</td>
                         <td>9</td>
+                    </tr>
+                    <tr>
+                        <td>Lipiec</td>
+                        <td>184</td>
+                        <td>23</td>
+                        <td>8</td>
+                    </tr>
+                    <tr>
+                        <td>Sierpień</td>
+                        <td>160</td>
+                        <td>20</td>
+                        <td>11</td>
+                    </tr>
+                    <tr>
+                        <td>Wrzesień</td>
+                        <td>176</td>
+                        <td>22</td>
+                        <td>8</td>
                     </tr>
                     <tr>
                         <td>Październik</td>
@@ -474,14 +474,17 @@
                     </tr>
                     <tr>
                         <td>Grudzień</td>
-                        <td>168</td>
-                        <td>21</td>
-                        <td>10</td>
+                        <td>160</td>
+                        <td>20</td>
+                        <td>11</td>
                     </tr>
                 </tbody>
             </table>
             <div class="working-time-source">
-                <strong>Źródło:</strong> <a href="https://www.kalendarzswiat.pl/wymiar_czasu_pracy/2026" target="_blank">kalendarzswiat.pl</a> | Zsynchronizowano: 26.02.2026
+                <strong>Źródła (2):</strong>
+                <a href="https://www.kalendarzswiat.pl/wymiar_czasu_pracy/2026" target="_blank">kalendarzswiat.pl</a>,
+                <a href="https://cgolegal.pl/baza-wiedzy/mobility-i-hr/czas-pracy-2026/" target="_blank">cgolegal.pl</a>
+                | Zweryfikowano: 26.02.2026
             </div>
         </div>
 
