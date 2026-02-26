@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polish Wage Calculator - Kalkulator Wynagrodzeń</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #0078d4;
+            --secondary-color: #107c10;
+            --bg-color: #f5f5f5;
+            --text-dark: #333;
+            --border-color: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+        }
+
+        input::placeholder {
+            color: #999;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #106ebe;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 120, 212, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 4px solid var(--secondary-color);
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .result-value {
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .formula-section {
+            background: #f0f7ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 30px;
+            border-left: 4px solid var(--primary-color);
+            font-size: 13px;
+            color: #555;
+        }
+
+        .formula-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .formula-line {
+            margin: 6px 0;
+            line-height: 1.5;
+            font-family: 'Courier New', monospace;
+        }
+
+        .error {
+            color: #d13438;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .result-value {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Kalkulator Wynagrodzeń</h1>
+        <p class="subtitle">Wage Calculator - Oblicz swoją stawkę godzinową i wynagrodzenie</p>
+
+        <form id="calculatorForm">
+            <div class="form-group">
+                <label for="monthlyRate">Stawka Miesięczna (Monthly Rate) *</label>
+                <input 
+                    type="number" 
+                    id="monthlyRate" 
+                    placeholder="Wpisz stawkę miesięczną (np. 21037)" 
+                    step="0.01"
+                    min="0"
+                    required
+                >
+                <p class="info-text">Twoja stawka miesięczna w PLN</p>
+                <div class="error" id="monthlyRateError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="hoursWorked">Godziny Przepracowane (Hours Worked) *</label>
+                <input 
+                    type="number" 
+                    id="hoursWorked" 
+                    placeholder="Wpisz ilość godzin w tym miesiącu (np. 160)" 
+                    step="0.25"
+                    min="0"
+                    required
+                >
+                <p class="info-text">Liczba godzin przepracowanych w danym miesiącu</p>
+                <div class="error" id="hoursWorkedError"></div>
+            </div>
+
+            <button type="submit">Oblicz / Calculate</button>
+        </form>
+
+        <div class="results" id="results">
+            <div class="result-row">
+                <span class="result-label">Stawka Godzinowa (Hourly Rate)</span>
+                <span class="result-value" id="hourlyRate">0.00 PLN</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Wynagrodzenie za Miesiąc (Monthly Salary)</span>
+                <span class="result-value" id="monthlySalary">0.00 PLN</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Wynagrodzenie za Rok (Annual Salary)</span>
+                <span class="result-value" id="annualSalary">0.00 PLN</span>
+            </div>
+        </div>
+
+        <div class="formula-section">
+            <div class="formula-title">📐 Użyta Formuła:</div>
+            <div class="formula-line"><strong>Stawka Godzinowa =</strong> (Stawka Miesięczna × 12) ÷ 231 ÷ 8</div>
+            <div class="formula-line"><strong>Wynagrodzenie Miesięczne =</strong> (Stawka Godzinowa × Godziny) + 300 PLN</div>
+            <div class="formula-line"><strong>Wynagrodzenie Roczne =</strong> Wynagrodzenie Miesięczne × 12</div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('calculatorForm');
+        const monthlyRateInput = document.getElementById('monthlyRate');
+        const hoursWorkedInput = document.getElementById('hoursWorked');
+        const resultsDiv = document.getElementById('results');
+
+        const WORKING_DAYS_PER_YEAR = 231; // 251 - 20 vacation days
+        const HOURS_PER_DAY = 8;
+        const OFFICE_BONUS = 300; // 300 PLN bonus
+        const MONTHS_PER_YEAR = 12;
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            clearErrors();
+            
+            if (validateInputs()) {
+                calculate();
+            }
+        });
+
+        // Real-time calculation as user types
+        monthlyRateInput.addEventListener('input', tryCalculate);
+        hoursWorkedInput.addEventListener('input', tryCalculate);
+
+        function validateInputs() {
+            let isValid = true;
+            const monthlyRate = parseFloat(monthlyRateInput.value);
+            const hoursWorked = parseFloat(hoursWorkedInput.value);
+
+            if (isNaN(monthlyRate) || monthlyRate <= 0) {
+                showError('monthlyRateError', 'Proszę wpisać prawidłową stawkę miesięczną');
+                isValid = false;
+            }
+
+            if (isNaN(hoursWorked) || hoursWorked < 0) {
+                showError('hoursWorkedError', 'Proszę wpisać prawidłową liczbę godzin');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function tryCalculate() {
+            if (monthlyRateInput.value && hoursWorkedInput.value) {
+                const monthlyRate = parseFloat(monthlyRateInput.value);
+                const hoursWorked = parseFloat(hoursWorkedInput.value);
+
+                if (monthlyRate > 0 && hoursWorked >= 0) {
+                    clearErrors();
+                    calculate();
+                }
+            }
+        }
+
+        function calculate() {
+            const monthlyRate = parseFloat(monthlyRateInput.value);
+            const hoursWorked = parseFloat(hoursWorkedInput.value);
+
+            // Calculate hourly rate
+            // (Monthly Rate × 12) ÷ 231 days ÷ 8 hours
+            const hourlyRate = (monthlyRate * MONTHS_PER_YEAR) / WORKING_DAYS_PER_YEAR / HOURS_PER_DAY;
+
+            // Calculate monthly salary
+            // (Hourly Rate × Hours Worked) + 300 PLN bonus
+            const monthlySalary = (hourlyRate * hoursWorked) + OFFICE_BONUS;
+
+            // Calculate annual salary
+            const annualSalary = monthlySalary * MONTHS_PER_YEAR;
+
+            // Display results
+            document.getElementById('hourlyRate').textContent = formatCurrency(hourlyRate);
+            document.getElementById('monthlySalary').textContent = formatCurrency(monthlySalary);
+            document.getElementById('annualSalary').textContent = formatCurrency(annualSalary);
+
+            resultsDiv.classList.add('show');
+        }
+
+        function formatCurrency(value) {
+            return value.toLocaleString('pl-PL', {
+                style: 'currency',
+                currency: 'PLN',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error').forEach(el => {
+                el.classList.remove('show');
+                el.textContent = '';
+            });
+        }
+
+        // Set focus on first input
+        monthlyRateInput.focus();
+    </script>
+</body>
+</html>
