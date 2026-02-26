@@ -408,13 +408,17 @@
             });
         }
 
-        function updateVisitorCounter() {
+        async function updateVisitorCounter() {
             try {
-                // Use localStorage to persist counter across sessions
-                let count = parseInt(localStorage.getItem('visitorCount') || '0', 10);
-                count++;
-                localStorage.setItem('visitorCount', count);
-                document.getElementById('visitorCount').textContent = count.toLocaleString();
+                // Call API which reads/increments/saves counter from Azure Blob Storage
+                const response = await fetch('/api/counter');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                document.getElementById('visitorCount').textContent = Number(data.count || 0).toLocaleString();
             } catch (error) {
                 console.error("[Counter] Error:", error.message);
                 document.getElementById('visitorCount').textContent = '—';
