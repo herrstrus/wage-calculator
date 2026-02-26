@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ENDV Wage Calculator - Kalkulator faktura B2B</title>
     <style>
+
+        .visitor-counter {
+            text-align: right;
+            color: rgba(25, 43, 55, 0.55);
+            font-size: 12px;
+            margin-top: 12px;
+            padding: 6px 2px 0;
+            background: transparent;
+        }
+
+        .visitor-counter .count {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(25, 43, 55, 0.6);
+            margin: 2px 0 0;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -65,6 +81,11 @@
         }
 
         .form-group {
+
+        <div class="visitor-counter">
+            <div>👥 Visits</div>
+            <div class="count" id="visitorCount">0</div>
+        </div>
             margin-bottom: 25px;
         }
 
@@ -213,22 +234,6 @@
             display: block;
         }
 
-        .visitor-counter {
-            text-align: right;
-            color: rgba(25, 43, 55, 0.55);
-            font-size: 12px;
-            margin-top: 12px;
-            padding: 6px 2px 0;
-            background: transparent;
-        }
-
-        .visitor-counter .count {
-            font-size: 14px;
-            font-weight: 600;
-            color: rgba(25, 43, 55, 0.6);
-            margin: 2px 0 0;
-        }
-
         @media (max-width: 480px) {
             .container {
                 padding: 25px;
@@ -303,10 +308,6 @@
             <div class="formula-line"><strong>Wynagrodzenie Roczne =</strong> Wynagrodzenie Miesięczne × 12</div>
         </div>
 
-        <div class="visitor-counter">
-            <div>👥 Visits</div>
-            <div class="count" id="visitorCount">0</div>
-        </div>
     </div>
 
     <script>
@@ -407,25 +408,6 @@
                 el.textContent = '';
             });
         }
-
-        async function updateVisitorCounter() {
-            try {
-                // Call API which reads/increments/saves counter from Azure Blob Storage
-                const response = await fetch('/api/counter');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                const data = await response.json();
-                document.getElementById('visitorCount').textContent = Number(data.count || 0).toLocaleString();
-            } catch (error) {
-                console.error("[Counter] Error:", error.message);
-                document.getElementById('visitorCount').textContent = '—';
-            }
-        }
-
-        updateVisitorCounter();
 
         // Set focus on first input
         monthlyRateInput.focus();
