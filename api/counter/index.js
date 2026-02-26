@@ -35,7 +35,7 @@ module.exports = async function (context, req) {
       }
     }
 
-    if (req.method === "POST") {
+    if (req.method !== "OPTIONS") {
       count += 1;
       await tableClient.upsertEntity({
         partitionKey: PARTITION_KEY,

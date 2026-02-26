@@ -269,7 +269,7 @@
                 <input 
                     type="number" 
                     id="hoursWorked" 
-                    placeholder="Wpisz ilość godzin w tym miesiącu (np. 160)" 
+                    placeholder="Wpisz ilość godzin w tym miesiącu (np. 168)" 
                     step="0.25"
                     min="0"
                     required
@@ -410,7 +410,7 @@
 
         async function updateVisitorCounter() {
             try {
-                const response = await fetch('/api/counter', { method: 'POST' });
+                const response = await fetch('/api/counter');
                 if (!response.ok) {
                     throw new Error('Counter request failed');
                 }
