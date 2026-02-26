@@ -5,41 +5,64 @@ function parseConnectionString(connStr) {
   const parts = {};
   connStr.split(";").forEach(part => {
     if (!part) return;
-    const [key, value] = part.split("=");
-    parts[key] = value;
+    const [key, ...rest] = part.split("=");
+    parts[key] = rest.join("=");
   });
   return parts;
 }
 
 // Create SharedKey authorization header for Azure Storage
-function createAuthHeader(method, accountName, accountKey, containerName, blobName, contentLength = 0) {
-  const canonicalResource = `/${accountName}/${containerName}/${blobName}`;
+function createAuthHeader(method, accountName, accountKey, containerName, blobName, contentLength = 0, contentType = "") {
   const dateString = new Date().toUTCString();
+  const version = "2021-06-08";
   
+  // String to sign format for Blob service
   const stringToSign = [
-    method,
-    "", // Content-MD5
-    "application/json", // Content-Type
-    "", // Date (empty, we use x-ms-date)
+    method,                      // HTTP Verb
+    "",                          // Content-Encoding
+    "",                          // Content-Language
+    contentLength || "",         // Content-Length (empty for GET)
+    "",                          // Content-MD5
+    contentType,                 // Content-Type
+    "",                          // Date
+    "",                          // If-Modified-Since
+    "",                          // If-Match
+    "",                          // If-None-Match
+    "",                          // If-Unmodified-Since
+    "",                          // Range
+    `x-ms-blob-type:BlockBlob`,  // Canonicalized headers (only for PUT)
     `x-ms-date:${dateString}`,
-    `x-ms-version:2021-06-08`,
-    canonicalResource
-  ].join("\n");
+    `x-ms-version:${version}`,
+    `/${accountName}/${containerName}/${blobName}` // Canonicalized resource
+  ].filter(line => method === 'GET' ? !line.startsWith('x-ms-blob-type') : true).join("\n");
   
   const hmac = crypto.createHmac("sha256", Buffer.from(accountKey, "base64"));
-  const signature = hmac.update(stringToSign).digest("base64");
+  const signature = hmac.update(stringToSign, "utf8").digest("base64");
   
-  return {
+  const headers = {
     "Authorization": `SharedKey ${accountName}:${signature}`,
-    "x-ms-version": "2021-06-08",
-    "x-ms-date": dateString,
-    "Content-Type": "application/json"
+    "x-ms-version": version,
+    "x-ms-date": dateString
   };
+  
+  if (contentType) {
+    headers["Content-Type"] = contentType;
+  }
+  
+  if (method === "PUT") {
+    headers["x-ms-blob-type"] = "BlockBlob";
+  }
+  
+  return headers;
 }
 
 module.exports = async function (context, req) {
   try {
     const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+    if (!connectionString) {
+      throw new Error("AZURE_STORAGE_CONNECTION_STRING not configured");
+    }
+    
     const { AccountName, AccountKey } = parseConnectionString(connectionString);
     
     const containerName = "counter";
@@ -62,10 +85,11 @@ module.exports = async function (context, req) {
         count = data.count || 0;
         context.log("Read count from blob:", count);
       } else if (readResponse.status !== 404) {
-        context.log("Read response status:", readResponse.status);
+        const errorText = await readResponse.text();
+        context.log("Read error:", readResponse.status, errorText);
       }
     } catch (e) {
-      context.log("First read attempt:", e.message);
+      context.log("Could not read blob:", e.message);
     }
     
     // Increment counter
@@ -73,8 +97,7 @@ module.exports = async function (context, req) {
     const data = JSON.stringify({ count, timestamp: new Date().toISOString() });
     
     // Write updated count
-    const writeHeaders = createAuthHeader("PUT", AccountName, AccountKey, containerName, blobName, data.length);
-    writeHeaders["x-ms-blob-type"] = "BlockBlob";
+    const writeHeaders = createAuthHeader("PUT", AccountName, AccountKey, containerName, blobName, data.length, "application/json");
     
     const writeResponse = await fetch(blobUrl, {
       method: "PUT",
@@ -84,7 +107,8 @@ module.exports = async function (context, req) {
     
     if (!writeResponse.ok) {
       const errorText = await writeResponse.text();
-      throw new Error(`Failed to write blob: ${writeResponse.status} ${errorText}`);
+      context.log.error("Write failed:", writeResponse.status, errorText);
+      throw new Error(`Failed to write blob: ${writeResponse.status}`);
     }
     
     context.log("Successfully wrote count:", count);
@@ -97,7 +121,7 @@ module.exports = async function (context, req) {
       }
     };
   } catch (error) {
-    context.log.error("Error in counter function:", error.message);
+    context.log.error("Error in counter function:", error.message, error.stack);
     return {
       status: 500,
       body: { error: error.message }
