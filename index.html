@@ -200,6 +200,24 @@
             display: block;
         }
 
+        .visitor-counter {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .visitor-counter .count {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin: 5px 0;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 25px;
@@ -272,6 +290,11 @@
             <div class="formula-line"><strong>Stawka Godzinowa =</strong> (Stawka Miesięczna × 12) ÷ 231 ÷ 8</div>
             <div class="formula-line"><strong>Wynagrodzenie Miesięczne =</strong> (Stawka Godzinowa × Godziny) + 300 PLN</div>
             <div class="formula-line"><strong>Wynagrodzenie Roczne =</strong> Wynagrodzenie Miesięczne × 12</div>
+        </div>
+
+        <div class="visitor-counter">
+            <div>👥 Wizyty / Visits</div>
+            <div class="count" id="visitorCount">0</div>
         </div>
     </div>
 
@@ -371,6 +394,19 @@
             document.querySelectorAll('.error').forEach(el => {
                 el.classList.remove('show');
                 el.textContent = '';
+
+        // Visitor Counter
+        function updateVisitorCounter() {
+            let visits = localStorage.getItem('visitorCount');
+            if (visits === null) {
+                visits = 0;
+            }
+            visits = parseInt(visits) + 1;
+            localStorage.setItem('visitorCount', visits);
+            document.getElementById('visitorCount').textContent = visits.toLocaleString();
+        }
+
+        updateVisitorCounter();
             });
         }
 
