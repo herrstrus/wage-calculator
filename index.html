@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENDV Wage Calculator - Kalkulator Wynagrodzeń</title>
+    <title>ENDV Wage Calculator - Kalkulator faktura B2B</title>
     <style>
         * {
             margin: 0;
@@ -12,12 +12,13 @@
         }
 
         :root {
-            --primary-color: #0078d4;
-            --secondary-color: #107c10;
-            --bg-color: #f5f5f5;
-            --text-dark: #333;
-            --border-color: #e0e0e0;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --primary-color: #ff563f;
+            --secondary-color: #69b5e8;
+            --bg-color: #ffffff;
+            --text-dark: #192b37;
+            --text-muted: #8c959c;
+            --border-color: #407090;
+            --shadow: 0 10px 40px rgba(25, 43, 55, 0.25);
         }
 
         body {
@@ -29,30 +30,35 @@
                 radial-gradient(circle at 40% 70%, #ff563f 0 90px, transparent 70px),
                 radial-gradient(circle at 90% 80%, #ff563f 0 70px, transparent 50px),
                 radial-gradient(circle at 10% 90%, #ff563f 0 60px, transparent 40px);
-            min-height: 100vh;#ff563f      display: flex;
+            min-height: 100vh;
+            display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
 
         .container {
-            background: white;
+            background: var(--bg-color);
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--shadow);
             max-width: 500px;
             width: 100%;
             padding: 40px;
         }
 
         h1 {
-            color: var(--primary-color);
+            color: var(--text-dark);
             margin-bottom: 10px;
             font-size: 28px;
             text-align: center;
         }
 
+        .brand-endv {
+            color: var(--primary-color);
+        }
+
         .subtitle {
-            color: #666;
+            color: var(--text-muted);
             text-align: center;
             font-size: 14px;
             margin-bottom: 30px;
@@ -83,16 +89,16 @@
         input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+            box-shadow: 0 0 0 3px rgba(105, 181, 232, 0.25);
         }
 
         input::placeholder {
-            color: #999;
+            color: var(--text-muted);
         }
 
         .info-text {
             font-size: 12px;
-            color: #666;
+            color: var(--text-muted);
             margin-top: 6px;
         }
 
@@ -100,7 +106,7 @@
             width: 100%;
             padding: 14px;
             background: var(--primary-color);
-            color: white;
+            color: var(--bg-color);
             border: none;
             border-radius: 6px;
             font-size: 16px;
@@ -111,9 +117,9 @@
         }
 
         button:hover {
-            background: #106ebe;
+            background: var(--secondary-color);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 120, 212, 0.3);
+            box-shadow: 0 5px 15px rgba(64, 112, 144, 0.3);
         }
 
         button:active {
@@ -126,6 +132,7 @@
             padding: 25px;
             margin-top: 30px;
             border-left: 4px solid var(--secondary-color);
+            border: 1px solid rgba(64, 112, 144, 0.3);
             display: none;
         }
 
@@ -161,7 +168,7 @@
         }
 
         .result-label {
-            color: #666;
+            color: var(--text-muted);
             font-size: 14px;
             font-weight: 500;
         }
@@ -173,13 +180,14 @@
         }
 
         .formula-section {
-            background: #f0f7ff;
+            background: var(--bg-color);
             border-radius: 8px;
             padding: 15px;
             margin-top: 30px;
             border-left: 4px solid var(--primary-color);
+            border: 1px solid rgba(64, 112, 144, 0.3);
             font-size: 13px;
-            color: #555;
+            color: var(--text-dark);
         }
 
         .formula-title {
@@ -195,7 +203,7 @@
         }
 
         .error {
-            color: #d13438;
+            color: var(--primary-color);
             font-size: 13px;
             margin-top: 8px;
             display: none;
@@ -206,21 +214,19 @@
         }
 
         .visitor-counter {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 14px;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
+            text-align: right;
+            color: rgba(25, 43, 55, 0.55);
+            font-size: 12px;
+            margin-top: 12px;
+            padding: 6px 2px 0;
+            background: transparent;
         }
 
         .visitor-counter .count {
-            font-size: 24px;
-            font-weight: 700;
-            color: white;
-            margin: 5px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(25, 43, 55, 0.6);
+            margin: 2px 0 0;
         }
 
         @media (max-width: 480px) {
@@ -240,7 +246,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>💰 ENDV Kalkulator Wynagrodzeń</h1>
+        <h1>💰 <span class="brand-endv">ENDV</span> Kalkulator Faktura B2B</h1>
         <p class="subtitle">Wage Calculator - Oblicz stawkę godzinową i wynagrodzenie</p>
 
         <form id="calculatorForm">
