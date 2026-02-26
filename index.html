@@ -405,21 +405,23 @@
             document.querySelectorAll('.error').forEach(el => {
                 el.classList.remove('show');
                 el.textContent = '';
+            });
+        }
 
-        // Visitor Counter
-        function updateVisitorCounter() {
-            let visits = localStorage.getItem('visitorCount');
-            if (visits === null) {
-                visits = 0;
+        async function updateVisitorCounter() {
+            try {
+                const response = await fetch('/api/counter', { method: 'POST' });
+                if (!response.ok) {
+                    throw new Error('Counter request failed');
+                }
+                const data = await response.json();
+                document.getElementById('visitorCount').textContent = Number(data.count || 0).toLocaleString();
+            } catch (error) {
+                document.getElementById('visitorCount').textContent = '—';
             }
-            visits = parseInt(visits) + 1;
-            localStorage.setItem('visitorCount', visits);
-            document.getElementById('visitorCount').textContent = visits.toLocaleString();
         }
 
         updateVisitorCounter();
-            });
-        }
 
         // Set focus on first input
         monthlyRateInput.focus();
