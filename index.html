@@ -409,14 +409,27 @@
         }
 
         async function updateVisitorCounter() {
+            console.log("[Counter] Attempting to fetch /api/counter");
             try {
                 const response = await fetch('/api/counter');
+                console.log("[Counter] Response status:", response.status, response.statusText);
+                console.log("[Counter] Response headers:", {
+                    contentType: response.headers.get('content-type'),
+                    cacheControl: response.headers.get('cache-control')
+                });
+                
                 if (!response.ok) {
-                    throw new Error('Counter request failed');
+                    const error = await response.text();
+                    console.error("[Counter] HTTP Error:", response.status, error);
+                    throw new Error(`HTTP ${response.status}: ${error}`);
                 }
+                
                 const data = await response.json();
+                console.log("[Counter] Success! Data:", data);
                 document.getElementById('visitorCount').textContent = Number(data.count || 0).toLocaleString();
+                console.log("[Counter] Updated display with count:", data.count);
             } catch (error) {
+                console.error("[Counter] Error:", error.message);
                 document.getElementById('visitorCount').textContent = '—';
             }
         }
