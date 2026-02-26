@@ -41,7 +41,7 @@ module.exports = async function (context, req) {
     const { AccountName, AccountKey } = parseConnectionString(connectionString);
     context.log(`Account: ${AccountName}`);
     
-    const tableName = "visitcounter";
+    const tableName = "visitCounter"; // Match the actual table name (case-sensitive)
     const partitionKey = "counter";
     const rowKey = "visits";
     
