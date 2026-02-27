@@ -9,6 +9,16 @@ You need:
 
 ## Quick Deployment Steps
 
+## Test the App Locally
+Before deploying, you can test it locally:
+```bash
+cd wage-calculator
+# Open in your browser or use a simple server:
+python3 -m http.server 8000
+# Then open: http://localhost:8000
+```
+
+
 ### Option A: Using Azure CLI (Recommended - 2 minutes)
 
 1. **Install Azure CLI** (if not already installed):
@@ -87,14 +97,6 @@ wage-calculator/
    - Monthly Salary: (Hourly Rate × Hours Worked) + 300 PLN bonus
    - Annual Salary: Monthly Salary × 12
 
-## Test the App Locally
-Before deploying, you can test it locally:
-```bash
-cd wage-calculator
-# Open in your browser or use a simple server:
-python3 -m http.server 8000
-# Then open: http://localhost:8000
-```
 
 ---
 
